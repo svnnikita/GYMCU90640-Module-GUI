@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>983</width>
-    <height>938</height>
+    <width>800</width>
+    <height>833</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>20</x>
       <y>520</y>
-      <width>941</width>
-      <height>361</height>
+      <width>761</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="palette">
@@ -93,7 +93,7 @@
    <widget class="QTableWidget" name="tableImage">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>80</x>
       <y>10</y>
       <width>650</width>
       <height>490</height>
@@ -106,7 +106,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>983</width>
+     <width>800</width>
      <height>26</height>
     </rect>
    </property>

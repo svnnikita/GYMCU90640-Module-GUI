@@ -8,6 +8,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QTableWidgetItem>
 #include <QColor>
+#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -17,10 +18,9 @@ MainWindow::MainWindow(QWidget *parent):
 
     setMainWindow();
     setTerminal();
+    setTableImage();
 
     COMPORT = new QSerialPort();
-
-    // textBrowser = new QTextBrowser();   // выделяем память под объект текстового окна
 
     // настраиваем параметры порта
     COMPORT->setPortName("/dev/ttyUSB0");
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent):
     // включаем порт
     if (COMPORT->open(QIODevice::ReadOnly)) {
         // qDebug() << "Serial port" << COMPORT->portName() << "is open";
-        ui->terminal->append("Serial port" + COMPORT->portName() + "is open");
+        ui->terminal->append("Serial port " + COMPORT->portName() + " is open");
 
     }
     else {
@@ -76,9 +76,9 @@ void MainWindow::Read_data() {
                 // qDebug() << frame.toHex(' ').toUpper();
                 // qDebug() << "=== FRAME END ===";
 
-                ui->terminal->append("=== FRAME START ===");
+                // ui->terminal->append("=== FRAME START ===\n");
                 // ui->terminal->append(frame.toHex(' ').toUpper());
-                ui->terminal->append("=== FRAME END ===");
+                // ui->terminal->append("=== FRAME END ===\n");
 
             } else break;
         }
@@ -99,8 +99,9 @@ void MainWindow::dataProcessing(QByteArray frame_f) {
 
     // qDebug() << "Объем данных:" << dataAmountOfThisFrame;
 
+    ui->terminal->append("\n=== FRAME START ===\n");
     dataAmountOfThisFrame_text = QStringLiteral("Объем данных: ") + QString::number(dataAmountOfThisFrame);
-    ui->terminal->insertPlainText(dataAmountOfThisFrame_text);
+    ui->terminal->insertPlainText(dataAmountOfThisFrame_text + "\n");
 
     // Вычисляем температуру (768 точек) и записываем в матрицу 32x24
     uint16_t i = 4;
@@ -109,7 +110,7 @@ void MainWindow::dataProcessing(QByteArray frame_f) {
 
             // идем по столбцам справа налево,
             // а по строкам -- сверху вниз
-            double temperature = ((frame_f[i + 1] << 8) + frame_f[i]) * 0.01;
+            double temperature = ((frame_f[i + 1] << 8) + frame_f[i]) / 100.0;
 
             uint8_t actualCol = COLS - 1 - col;
 
@@ -123,12 +124,12 @@ void MainWindow::dataProcessing(QByteArray frame_f) {
     editCells();
 
     // Вычисляем собственную температуру датчика
-    ownTemperature = (frame_f.at(1541) << 8) + frame_f.at(1540) * 0.01;
+    ownTemperature = ((frame_f.at(1541) << 8) + frame_f.at(1540)) / 100.0;
 
     // Выводим в терминал
     // qDebug() << "Температура датчика:" << ownTemperature;
     ownTemperature_text = QStringLiteral("Температура датчика: ") + QString::number(ownTemperature);
-    ui->terminal->insertPlainText(ownTemperature_text);
+    ui->terminal->insertPlainText(ownTemperature_text + "\n");
 
     // Вычисляем контрольную сумму
     cumulativeSum = (frame_f.at(1543) << 8) + frame_f.at(1542);
@@ -136,7 +137,11 @@ void MainWindow::dataProcessing(QByteArray frame_f) {
     // Выводим в терминал
     // qDebug() << "Контрольная сумма:" << (frame_f.at(1543) << 8) + frame_f.at(1542) << "\r\n";
     cumulativeSum_text = QStringLiteral("Контрольная сумма: ") + QString::number(cumulativeSum);
-    ui->terminal->insertPlainText(cumulativeSum_text);
+    ui->terminal->insertPlainText(cumulativeSum_text + "\n");
+    ui->terminal->insertPlainText("=== FRAME END ===");
+
+    QScrollBar *scrollBar = ui->terminal->verticalScrollBar();
+    scrollBar->setValue(scrollBar->maximum());
 
     // Вывод температуры в terminal
     // ui->terminal->append("==========================================================");
@@ -168,6 +173,7 @@ void MainWindow::setTerminal() {
     font.setPointSize(14); // Установить размер в пунктах
     ui->terminal->setFont(font);
 
+    // Устанавливаем фон текстового окна
     ui->terminal->setTextColor(QColor(255, 255, 255));
     ui->terminal->setPlainText(ui->terminal->toPlainText());
     ui->terminal->setStyleSheet("background-color: black;");
@@ -175,9 +181,10 @@ void MainWindow::setTerminal() {
 
 // меняем фон приложения
 void MainWindow::setMainWindow() {
-    QPixmap bkgnd("/home/nikita/Downloads/app_background.jpg");
+    QPixmap bkgnd(":/bkgnd/bkgnd.jpeg");
+    QPixmap scaled_bkgnd = bkgnd.scaled(MainWindow::size().width(), MainWindow::size().height());
     QPalette palette;
-    palette.setBrush(QPalette::Window, bkgnd);
+    palette.setBrush(QPalette::Window, scaled_bkgnd);
     MainWindow::setPalette(palette);
 }
 
@@ -241,20 +248,20 @@ void MainWindow::editCells() {
 
             double value = temp[row][col];
 
+            // Создаем объект ячейки таблицы и помещаем в каждый элемент значение температуры
             QTableWidgetItem *item = new QTableWidgetItem(QString::number(value));
-            item->setTextAlignment(Qt::AlignCenter);
+            item->setTextAlignment(Qt::AlignCenter);    // выравниваем по центру
 
             // Вычисляем цвет
             double normalized = (value - minVal) / (maxVal - minVal);
             QColor color(
-                static_cast<int>(normalized * 255),   // красный
-                0,                                    // зеленый
-                static_cast<int>((1 - normalized) * 255) // синий
+                static_cast<int>(normalized * 255),         // красный
+                0,                                          // зеленый
+                static_cast<int>((1 - normalized) * 255)    // синий
                 );
 
-            item->setBackground(QBrush(color));
-            //item->setForeground(QBrush(color.lightness() > 128 ? Qt::black : Qt::white));
-            ui->tableImage->setItem(row, col, item);
+            item->setBackground(QBrush(color));         // устанавливаем задний фон
+            ui->tableImage->setItem(row, col, item);    // устанавливаем элементы в таблицу
         }
     }
 }

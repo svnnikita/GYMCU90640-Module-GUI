@@ -40,14 +40,11 @@ private slots:
 private:
     Ui::MainWindow * ui;        // графический интерфейс
 
-    // QTableWidget tableWidget;   // объект таблицы
-    // QTextBrowser *textBrowser;
-
     QSerialPort *COMPORT;       // объект порта
 
     QByteArray serialBuffer;
     QByteArray frame;           // преобразованный кадр с датчика
-    QByteArray newData;
+    QByteArray newData;         // сырые данные с датчика
 
     double temp[ROWS][COLS];    // матрица температур 24 строки на 32 столбца
 
