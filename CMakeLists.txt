@@ -20,7 +20,7 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(test
+    qt_add_executable(GYMCU90640-Module-GUI
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
@@ -38,6 +38,7 @@ else()
     else()
         add_executable(GYMCU90640-Module-GUI
             ${PROJECT_SOURCES}
+            srcs/resources.qrc
         )
     endif()
 endif()
