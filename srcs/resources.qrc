@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/bkgnd">
+        <file>bkgnd.jpeg</file>
+    </qresource>
+</RCC>
