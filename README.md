@@ -1,4 +1,4 @@
-![gui_img|500](img.png)
+![Image](https://github.com/svnnikita/GYMCU90640-Module-GUI/raw/main/img/img.png)
 
 ## Курсовой проект по телеметрии студента гр. 233 Савина Никиты (2025 год). Графический интерфейс
 
